@@ -16,6 +16,7 @@ exports.calculate = function(req, res) {
     'subtract': function(a, b) { return a - b },
     'multiply': function(a, b) { return a * b },
     'divide':   function(a, b) { return a / b },
+    'power':    function(a, b) { return Math.pow(a, b) }
   };
 
   if (!req.query.operation) {
@@ -40,5 +41,12 @@ exports.calculate = function(req, res) {
     throw new Error("Invalid operand2: " + req.query.operand2);
   }
 
-  res.json({ result: operation(req.query.operand1, req.query.operand2) });
+  // compute result and normalize invalid numeric results to null (NaN/Infinity)
+  var rawResult = operation(req.query.operand1, req.query.operand2);
+  var numericResult = Number(rawResult);
+  if (Number.isNaN(numericResult) || !Number.isFinite(numericResult)) {
+    numericResult = null;
+  }
+
+  res.json({ result: numericResult });
 };
